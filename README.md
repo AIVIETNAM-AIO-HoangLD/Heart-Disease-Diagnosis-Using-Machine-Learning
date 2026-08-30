@@ -1,11 +1,11 @@
-# ❤️ Project 3.1: Heart Disease Diagnosis Using Machine Learning
+# Heart Disease Diagnosis Using Machine Learning
 
 **AI VIET NAM – AI Course 2026**  
 *A comprehensive, modular machine learning project for diagnosing coronary artery disease (CAD) using clinical datasets, advanced ensemble techniques, explainability, and interactive web deployment.*
 
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 - [1. Overview & Problem Definition](#1-overview--problem-definition)
 - [2. Repository Architecture](#2-repository-architecture)
 - [3. Quickstart & Installation](#3-quickstart--installation)
