@@ -82,7 +82,7 @@ conquer/
 ### Step 1: Clone or Open Workspace
 Ensure you are in the project root:
 ```bash
-cd /home/hoangLD/Desktop/AIVIETNAM/Module-03/conquer
+cd ./Module-03/conquer
 ```
 
 ### Step 2: Set up Virtual Environment & Dependencies
