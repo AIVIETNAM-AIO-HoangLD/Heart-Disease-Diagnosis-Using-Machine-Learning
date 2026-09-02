@@ -39,7 +39,11 @@ def evaluate_predictions(
     """
     # TODO [USER IMPLEMENTATION]:
     # Calculate and package evaluation metrics
-    raise NotImplementedError("Implement `evaluate_predictions` following the hints.")
+    acc = accuracy_score(y_true,y_pred)
+    report = classification_report(y_true, y_pred, output_dict=True)
+    cm = confusion_matrix(y_true, y_pred)
+    auc = roc_auc_score(y_true,y_proba) if y_proba is not None else None
+    return acc, report, cm, auc
 
 
 def print_classification_summary(

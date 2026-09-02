@@ -26,6 +26,8 @@ MATHEMATICAL & CONCEPTUAL BACKGROUND:
 =============================================================================
 """
 
+from re import X
+from pandas._typing import T
 from pathlib import Path
 from typing import Dict, Tuple, Union
 import pandas as pd
@@ -69,8 +71,13 @@ def load_raw_data(data_path: Union[str, Path]) -> pd.DataFrame:
     # 3. Convert numeric columns with possible '?' to numeric float (errors='coerce')
     # 4. Convert target column to binary (0 and 1)
     # 5. Return the prepared DataFrame
-    raise NotImplementedError("Implement `load_raw_data` following the hints in docstring.")
-
+    # raise NotImplementedError("Implement `load_raw_data` following the hints in docstring.")
+    data_frame = pd.read_csv(data_path, header=None)
+    data_frame.columns = ALL_COLUMNS
+    for col in COERCE_NUMERIC_COLUMNS:
+        data_frame[col] = pd.to_numeric(data_frame[col], errors="coerce")
+    data_frame[TARGET] = (data_frame[TARGET] > 0).astype(int)
+    return data_frame
 
 def split_dataset(
     df: pd.DataFrame,
@@ -102,6 +109,24 @@ def split_dataset(
            - `stratify = y_temp`
         4. Return X_train, X_val, X_test, y_train, y_val, y_test
     """
+    X = df.drop(columns=[TARGET])
+    y = df[TARGET]
+
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, 
+        test_size=(val_ratio + test_ratio), 
+        random_state=random_state, 
+        stratify=y
+    )
+    # Stage 2: Split 20% Temp equally (50% each) into 10% Val and 10% Test
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, 
+        test_size=0.5, 
+        random_state=random_state, 
+        stratify=y_temp
+    )
+
+
     assert abs((train_ratio + val_ratio + test_ratio) - 1.0) < 1e-5, "Ratios must sum to 1.0"
 
     # TODO [USER IMPLEMENTATION]:
@@ -109,7 +134,7 @@ def split_dataset(
     # 2. Stage 1 split: train vs (val + test)
     # 3. Stage 2 split: val vs test
     # 4. Return (X_train, X_val, X_test, y_train, y_val, y_test)
-    raise NotImplementedError("Implement `split_dataset` following the hints in docstring.")
+    return X_train, X_val, X_test, y_train, y_val, y_test
 
 
 def save_splits(splits_dict: Dict[str, pd.DataFrame], output_dir: Union[str, Path]) -> None:

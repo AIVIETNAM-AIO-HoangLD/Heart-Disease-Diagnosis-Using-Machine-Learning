@@ -55,15 +55,16 @@ def build_numeric_pipeline(
     # TODO [USER IMPLEMENTATION]:
     # 1. Select appropriate scaler
     # 2. Build and return Pipeline([('imputer', ...), ('scaler', ...)])
-    raise NotImplementedError("Implement `build_numeric_pipeline` following the hints.")
-
+    # raise NotImplementedError("Implement `build_numeric_pipeline` following the hints.")
+    num_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("scaler", StandardScaler(scaler_type))])
+    return num_proc
 
 def build_categorical_pipeline(
     impute_strategy: str = "most_frequent",
     encoder_type: str = "minmax",
 ) -> Pipeline:
     """
-    Construct a categorical preprocessing Pipeline.
+    Construct a categorical preprocessing Pipeline. 
 
     Args:
         impute_strategy: Strategy for SimpleImputer ('most_frequent').
@@ -85,6 +86,11 @@ def build_categorical_pipeline(
     # 1. Choose encoding / scaling strategy
     # 2. Return Pipeline([('imputer', ...), ('encoder', ...)])
     raise NotImplementedError("Implement `build_categorical_pipeline` following the hints.")
+    if encoder_type == "onehot":
+        cat_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("encoder", OneHotEncoder())])
+    elif encoder_type == "minmax":
+        cat_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("encoder", MinMaxScaler())])
+    return cat_proc
 
 
 def build_preprocessor(
@@ -118,3 +124,7 @@ def build_preprocessor(
     # 2. Bundle them in ColumnTransformer
     # 3. Configure `.set_output(transform='pandas')` so transforms return DataFrames
     raise NotImplementedError("Implement `build_preprocessor` following the hints.")
+    num_pipe = build_numeric_pipeline(scaler_type=num_scaler)
+    cat_pipe = build_categorical_pipeline(encoder_type=cat_encoder)
+    return ColumnTransformer(transformers=[("num",num_pipe, numeric_cols),("cat",cat_pipe,categorical_cols)],verbose_feature_names_out=False).set_output(transform="pandas")
+

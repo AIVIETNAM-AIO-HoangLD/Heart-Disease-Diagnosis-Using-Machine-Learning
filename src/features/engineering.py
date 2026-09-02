@@ -59,8 +59,7 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     # 1. Compute domain-specific age ratios
     # 2. Bin age into 5 discrete categories
     # 3. Return transformed DataFrame
-    raise NotImplementedError("Implement `add_new_features` following the hints.")
-
+    
 
 class AddNewFeaturesTransformer(BaseEstimator, TransformerMixin):
     """

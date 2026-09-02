@@ -31,7 +31,10 @@ def plot_correlation_matrix(
     """
     # TODO [USER IMPLEMENTATION]:
     # Plot and display heatmap
-    raise NotImplementedError("Implement `plot_correlation_matrix`.")
+    corr = df[columns].corr()
+    sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", annot_kws={'size':9})
+    plt.title(title)
+    plt.show()
 
 
 def plot_scatter_with_regression(
@@ -54,6 +57,16 @@ def plot_scatter_with_regression(
         6. plt.plot(xline, k * xline + b, color='black', linestyle='--')
     """
     # TODO [USER IMPLEMENTATION]:
+    mask = xs.notna() & ys.notna()
+    colors = np.where(target == 0, 'tab:blue', 'tab:red')
+    plt.scatter(xs, ys, c=colors, alpha=0.7)
+    k, b = np.polyfit(xs[mask], ys[mask], 1)
+    xline = np.linspace(xs[mask].min(), xs[mask].max(), 100)
+    plt.plot(xline, k * xline + b, color='black', linestyle='--')
+    plt.title(title)
+    plt.xlabel(xlab)
+    plt.ylabel(ylab)
+    plt.show()
     raise NotImplementedError("Implement `plot_scatter_with_regression`.")
 
 
@@ -73,6 +86,10 @@ def plot_cross_validation_curve(
         4. plt.grid(True)
     """
     # TODO [USER IMPLEMENTATION]:
+    plt.figure(figsize=(10, 6))
+    plt.plot(param_values, cv_scores, 'bo-', linewidth=2)
+    plt.grid(True)
+    plt.show()
     raise NotImplementedError("Implement `plot_cross_validation_curve`.")
 
 
@@ -91,6 +108,12 @@ def plot_feature_importance(
         4. plt.ylabel("Feature")
     """
     # TODO [USER IMPLEMENTATION]:
+    top = importance_series.head(top_n).iloc[::-1]
+    plt.barh(top.index, top.values, color='tab:blue')
+    plt.xlabel("Score")
+    plt.ylabel("Feature")
+    plt.title(title)
+    plt.show()
     raise NotImplementedError("Implement `plot_feature_importance`.")
 
 
@@ -113,4 +136,17 @@ def plot_comparison_bar_chart(
         6. Annotate values on top of bars
     """
     # TODO [USER IMPLEMENTATION]:
+    x = np.arange(len(dataset_labels))
+    width = 0.35
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.bar(x - width/2, val_accuracies, width, label='Validation Accuracy', color='tab:blue')
+    ax.bar(x + width/2, test_accuracies, width, label='Test Accuracy', color='tab:red')
+    ax.set_ylim(0.5, 1.05)
+    ax.set_xticks(x)
+    ax.set_xticklabels(dataset_labels)
+    ax.set_xlabel("Dataset")
+    ax.set_ylabel("Accuracy")
+    ax.set_title(model_name)
+    ax.legend()
+    plt.show()
     raise NotImplementedError("Implement `plot_comparison_bar_chart`.")
