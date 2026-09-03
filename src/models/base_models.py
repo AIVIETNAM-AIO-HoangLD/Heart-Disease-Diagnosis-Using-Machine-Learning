@@ -51,22 +51,16 @@ class GaussianNBModel:
         self.model = GaussianNB()
 
     def fit(self, X_train: Union[pd.DataFrame, np.ndarray], y_train: Union[pd.Series, np.ndarray]):
-        """Fit Gaussian Naive Bayes on training data."""
-        # TODO [USER IMPLEMENTATION]:
-        # Fit self.model on X_train, y_train and return self
-        raise NotImplementedError("Implement `fit` for GaussianNBModel.")
-
+        self.model.fit(X_train, y_train)
+        return self
+        
     def predict(self, X: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """Predict class labels."""
-        # TODO [USER IMPLEMENTATION]:
-        # Call and return self.model.predict(X)
-        raise NotImplementedError("Implement `predict` for GaussianNBModel.")
+        return self.model.predict(X)
 
     def predict_proba(self, X: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """Predict class probabilities."""
-        # TODO [USER IMPLEMENTATION]:
-        # Call and return self.model.predict_proba(X)
-        raise NotImplementedError("Implement `predict_proba` for GaussianNBModel.")
+        return self.model.predict_proba(X)
 
 
 class KNNModel:
@@ -84,28 +78,22 @@ class KNNModel:
         cv_splits: int = CV_SPLITS,
         random_state: int = SEED,
     ) -> Tuple[int, List[float]]:
-        """
-        Find optimal K using Stratified K-Fold Cross-Validation.
-
-        HINT:
-            1. Setup `cv = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=random_state)`
-            2. Iterate through each `k in k_range`:
-               - Create `knn = KNeighborsClassifier(n_neighbors=k)`
-               - Compute `scores = cross_val_score(knn, X_train, y_train, cv=cv, scoring='accuracy', n_jobs=-1)`
-               - Record `mean_score = scores.mean()`
-            3. Find `best_k = list(k_range)[np.argmax(scores_list)]`
-            4. Return `(best_k, scores_list)`
-        """
-        # TODO [USER IMPLEMENTATION]:
-        # Implement cross-validation loop to find best K
-        raise NotImplementedError("Implement `find_optimal_k` for KNNModel.")
+        cv = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=random_state)
+        scores_list = []
+        for k in k_range:
+            knn = KNeighborsClassifier(n_neighbors=k)
+            scores = cross_val_score(knn, X_train, y_train, cv=cv, scoring="accuracy", n_jobs=-1)
+            scores_list.append(scores.mean())
+        best_k = list(k_range)[np.argmax(scores_list)]
+        return (best_k, scores_list)
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series, optimal_k: Optional[int] = None):
         """Fit KNN with specified or optimal K."""
-        # TODO [USER IMPLEMENTATION]:
-        # 1. Update self.n_neighbors if optimal_k is provided
-        # 2. Instantiate and fit self.model
-        raise NotImplementedError("Implement `fit` for KNNModel.")
+        if optimal_k is not None:
+            self.n_neighbors = optimal_k
+        self.model = KNeighborsClassifier(n_neighbors=self.n_neighbors)
+        self.model.fit(X_train, y_train)
+        return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
@@ -130,25 +118,23 @@ class DecisionTreeModel:
         cv_splits: int = CV_SPLITS,
         random_state: int = SEED,
     ) -> Tuple[int, List[float]]:
-        """
-        Find optimal tree depth using Stratified K-Fold Cross Validation.
 
-        HINT:
-            1. Create StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=random_state)
-            2. For each depth in depth_range, fit DecisionTreeClassifier(max_depth=depth)
-            3. Compute cross_val_score(..., scoring='accuracy')
-            4. Pick best_depth corresponding to argmax of average scores
-            5. Return (best_depth, scores_list)
-        """
-        # TODO [USER IMPLEMENTATION]:
-        # Implement cross-validation loop to find optimal depth
-        raise NotImplementedError("Implement `find_optimal_depth` for DecisionTreeModel.")
+        cv = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=random_state)
+        scores_list = []
+        for depth in depth_range:
+            dt = DecisionTreeClassifier(max_depth=depth, random_state=random_state)
+            scores = cross_val_score(dt, X_train, y_train, cv=cv, scoring="accuracy", n_jobs=-1)
+            scores_list.append(scores.mean())
+        best_depth = list(depth_range)[np.argmax(scores_list)]
+        return (best_depth, scores_list)
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series, max_depth: Optional[int] = None):
         """Fit Decision Tree model."""
-        # TODO [USER IMPLEMENTATION]:
-        # Update self.max_depth and fit self.model on training set
-        raise NotImplementedError("Implement `fit` for DecisionTreeModel.")
+        if max_depth is not None:
+            self.max_depth = max_depth
+        self.model = DecisionTreeClassifier(max_depth=self.max_depth, random_state=self.random_state)
+        self.model.fit(X_train, y_train)
+        return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
@@ -158,9 +144,9 @@ class DecisionTreeModel:
 
     def get_feature_importances(self, feature_names: List[str]) -> pd.Series:
         """Return sorted Series of Gini feature importances."""
-        # TODO [USER IMPLEMENTATION]:
-        # Return pd.Series(self.model.feature_importances_, index=feature_names).sort_values(ascending=False)
-        raise NotImplementedError("Implement `get_feature_importances`.")
+        importances = pd.Series(self.model.feature_importances_, index=feature_names)
+        importances = importances.sort_values(ascending=False)
+        return importances
 
 
 class KMeansClassifierModel:
@@ -175,33 +161,20 @@ class KMeansClassifierModel:
         self.cluster_to_class_map: Dict[int, int] = {}
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series):
-        """
-        Fit KMeans on X_train and compute cluster -> label mapping using majority voting.
-
-        HINT:
-            1. Fit `self.model.fit(X_train)`
-            2. Get train cluster assignments: `train_clusters = self.model.labels_`
-            3. For each cluster_id in unique(train_clusters):
-               Find the mode of true labels:
-               `majority_class = Counter(y_train[train_clusters == cluster_id]).most_common(1)[0][0]`
-               `self.cluster_to_class_map[cluster_id] = majority_class`
-        """
-        # TODO [USER IMPLEMENTATION]:
-        # 1. Fit KMeans on X_train
-        # 2. Build self.cluster_to_class_map
-        raise NotImplementedError("Implement `fit` for KMeansClassifierModel.")
+        self.model.fit(X_train)
+        train_labels = self.model.predict(X_train)
+        for cluster_id in set(train_labels):
+            majority_class = Counter(y_train[train_labels == cluster_id]).most_common(1)[0][0]
+            self.cluster_to_class_map[cluster_id] = majority_class
+        return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         """
         Predict cluster for each sample and map it to binary class label.
 
-        HINT:
-            1. `clusters = self.model.predict(X)`
-            2. Map clusters: `np.array([self.cluster_to_class_map[c] for c in clusters])`
         """
-        # TODO [USER IMPLEMENTATION]:
-        # Predict clusters and map to class labels
-        raise NotImplementedError("Implement `predict` for KMeansClassifierModel.")
+        clusters = self.model.predict(X)
+        return np.array([self.cluster_to_class_map[c] for c in clusters])
 
 
 class StackingEnsembleModel:
@@ -227,9 +200,8 @@ class StackingEnsembleModel:
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series):
         """Fit StackingClassifier on training split."""
-        # TODO [USER IMPLEMENTATION]:
-        # Fit self.model on X_train, y_train
-        raise NotImplementedError("Implement `fit` for StackingEnsembleModel.")
+        self.model.fit(X_train,y_train)
+        return self
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)

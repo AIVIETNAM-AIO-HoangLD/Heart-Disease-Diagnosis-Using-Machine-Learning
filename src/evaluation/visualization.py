@@ -67,7 +67,6 @@ def plot_scatter_with_regression(
     plt.xlabel(xlab)
     plt.ylabel(ylab)
     plt.show()
-    raise NotImplementedError("Implement `plot_scatter_with_regression`.")
 
 
 def plot_cross_validation_curve(
@@ -85,12 +84,13 @@ def plot_cross_validation_curve(
         3. Annotate optimal point
         4. plt.grid(True)
     """
-    # TODO [USER IMPLEMENTATION]:
     plt.figure(figsize=(10, 6))
     plt.plot(param_values, cv_scores, 'bo-', linewidth=2)
+    plt.title(title)
+    plt.xlabel(param_name)
+    plt.ylabel("Cross-Validation Accuracy")
     plt.grid(True)
     plt.show()
-    raise NotImplementedError("Implement `plot_cross_validation_curve`.")
 
 
 def plot_feature_importance(
@@ -107,14 +107,14 @@ def plot_feature_importance(
         3. plt.xlabel("Score")
         4. plt.ylabel("Feature")
     """
-    # TODO [USER IMPLEMENTATION]:
     top = importance_series.head(top_n).iloc[::-1]
+    plt.figure(figsize=(10, max(6, 0.35 * len(top))))
     plt.barh(top.index, top.values, color='tab:blue')
     plt.xlabel("Score")
     plt.ylabel("Feature")
     plt.title(title)
+    plt.tight_layout()
     plt.show()
-    raise NotImplementedError("Implement `plot_feature_importance`.")
 
 
 def plot_comparison_bar_chart(
@@ -135,12 +135,11 @@ def plot_comparison_bar_chart(
         5. ax.set_ylim(0.5, 1.05)
         6. Annotate values on top of bars
     """
-    # TODO [USER IMPLEMENTATION]:
     x = np.arange(len(dataset_labels))
     width = 0.35
     fig, ax = plt.subplots(figsize=figsize)
-    ax.bar(x - width/2, val_accuracies, width, label='Validation Accuracy', color='tab:blue')
-    ax.bar(x + width/2, test_accuracies, width, label='Test Accuracy', color='tab:red')
+    rects1 = ax.bar(x - width/2, val_accuracies, width, label='Validation Accuracy', color='tab:blue')
+    rects2 = ax.bar(x + width/2, test_accuracies, width, label='Test Accuracy', color='tab:red')
     ax.set_ylim(0.5, 1.05)
     ax.set_xticks(x)
     ax.set_xticklabels(dataset_labels)
@@ -148,5 +147,9 @@ def plot_comparison_bar_chart(
     ax.set_ylabel("Accuracy")
     ax.set_title(model_name)
     ax.legend()
+    for rects in [rects1, rects2]:
+        for rect in rects:
+            h = rect.get_height()
+            ax.annotate(f"{h:.2f}", xy=(rect.get_x() + rect.get_width()/2, h), ha="center", va="bottom")
+    plt.tight_layout()
     plt.show()
-    raise NotImplementedError("Implement `plot_comparison_bar_chart`.")
