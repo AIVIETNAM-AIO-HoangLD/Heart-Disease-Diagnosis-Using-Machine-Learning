@@ -59,7 +59,17 @@ def add_new_features(df: pd.DataFrame) -> pd.DataFrame:
     # 1. Compute domain-specific age ratios
     # 2. Bin age into 5 discrete categories
     # 3. Return transformed DataFrame
-    
+    df = df.copy()
+    if "chol" in df.columns and "age" in df.columns:
+        df["chol_per_age"] = df["chol"] / df["age"]
+    if "trestbps" in df.columns and "age" in df.columns:
+        df["bps_per_age"] = df["trestbps"] / df["age"]
+    if "thalach" in df.columns and "age" in df.columns:
+        df["hr_ratio"] = df["thalach"] / df["age"]
+    if "age" in df.columns:
+        df["age_bin"] = pd.cut(df["age"], bins=5, labels=False).astype("category")
+    return df
+
 
 class AddNewFeaturesTransformer(BaseEstimator, TransformerMixin):
     """
@@ -77,13 +87,23 @@ class AddNewFeaturesTransformer(BaseEstimator, TransformerMixin):
         # 1. Record `self.columns_ = X.columns`
         # 2. Check for existence of 'chol', 'trestbps', 'thalach', 'age' to populate `self.new_features_`
         # 3. Return `self`
-        raise NotImplementedError("Implement `fit` for AddNewFeaturesTransformer.")
+        self.columns = X.columns
+        self.columns_ = []
+        if "chol" in X.columns and "age" in X.columns:
+            self.new_features_.append("chol_per_age")
+        if "trestbps" in X.columns and "age" in X.columns:
+            self.new_features_.append("bps_per_age")
+        if "thalach" in X.columns and "age" in X.columns:
+            self.new_features_.append("hr_ratio")
+        if "age" in X.columns:
+            self.new_features_.append("age_bin")
+        return self
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         """Apply `add_new_features` transformation to input X."""
-        # TODO [USER IMPLEMENTATION]:
+        # TODO [USER IMPLEMENTATION]
         # 1. Return `add_new_features(X)`
-        raise NotImplementedError("Implement `transform` for AddNewFeaturesTransformer.")
+        return add_new_features(X)
 
     def get_feature_names_out(self, input_features=None) -> List[str]:
         """Return list of all output column names after transformation."""

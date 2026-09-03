@@ -65,12 +65,13 @@ def select_top_k_mutual_info(
         4. Select top K: `top_cols = list(mi_series.head(k).index)`
         5. Return `(top_cols, mi_series)`
     """
-    # TODO [USER IMPLEMENTATION]:
-    # 1. Determine boolean discrete feature mask
-    # 2. Call mutual_info_classif
-    # 3. Sort scores and slice top-k features
-    # 4. Return (top_cols, mi_series)
-    raise NotImplementedError("Implement `select_top_k_mutual_info` following the hints.")
+    is_discrete = [col in categorical_feature_names for col in X_train.columns]
+    mi = mutual_info_classif(
+        X_train.values, y_train.values, discrete_features=is_discrete, random_state=random_state
+    )
+    mi_series = pd.Series(mi, index=X_train.columns).sort_values(ascending=False)
+    top_cols = list(mi_series.head(k).index)
+    return top_cols, mi_series
 
 
 def select_top_k_decision_tree(
@@ -98,12 +99,12 @@ def select_top_k_decision_tree(
         4. Select top K: `top_cols = list(importance_series.head(k).index)`
         5. Return `(top_cols, importance_series)`
     """
-    # TODO [USER IMPLEMENTATION]:
-    # 1. Fit DecisionTreeClassifier
-    # 2. Extract and sort feature_importances_
-    # 3. Slice top-k column names
-    # 4. Return (top_cols, importance_series)
-    raise NotImplementedError("Implement `select_top_k_decision_tree` following the hints.")
+    dt = DecisionTreeClassifier(random_state=random_state)
+    dt.fit(X_train, y_train)
+    importance_series = pd.Series(dt.feature_importances_, index=X_train.columns)
+    importance_series = importance_series.sort_values(ascending=False)
+    top_cols = list(importance_series.head(k).index)
+    return top_cols, importance_series
 
 
 def filter_low_variance_features(
@@ -119,5 +120,6 @@ def filter_low_variance_features(
         selector.fit(X_train)
         return list(X_train.columns[selector.get_support()])
     """
-    # TODO [USER IMPLEMENTATION - IMPROVEMENT]
-    raise NotImplementedError("Implement `filter_low_variance_features`.")
+    selector = VarianceThreshold(threshold=threshold)
+    selector.fit(X_train)
+    return list(X_train.columns[selector.get_support()])

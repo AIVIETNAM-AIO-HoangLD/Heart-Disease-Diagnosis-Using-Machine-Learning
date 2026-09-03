@@ -52,12 +52,15 @@ def build_numeric_pipeline(
            - 'robust': `RobustScaler()` (Useful for outliers in chol/trestbps)
         3. Return `Pipeline(steps=[('imputer', imputer), ('scaler', scaler)])`
     """
-    # TODO [USER IMPLEMENTATION]:
-    # 1. Select appropriate scaler
-    # 2. Build and return Pipeline([('imputer', ...), ('scaler', ...)])
-    # raise NotImplementedError("Implement `build_numeric_pipeline` following the hints.")
-    num_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("scaler", StandardScaler(scaler_type))])
-    return num_proc
+    if scaler_type == "standard":
+        scaler = StandardScaler()
+    elif scaler_type == "minmax":
+        scaler = MinMaxScaler()
+    elif scaler_type == "robust":
+        scaler = RobustScaler()
+    else:
+        raise ValueError(f"Unsupported scaler_type: {scaler_type}")
+    return Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)), ("scaler", scaler)])
 
 def build_categorical_pipeline(
     impute_strategy: str = "most_frequent",
@@ -82,15 +85,13 @@ def build_categorical_pipeline(
            - If 'onehot': `OneHotEncoder(handle_unknown='ignore', sparse_output=False)`
         3. Return `Pipeline(steps=[('imputer', imputer), ('encoder', encoder)])`
     """
-    # TODO [USER IMPLEMENTATION]:
-    # 1. Choose encoding / scaling strategy
-    # 2. Return Pipeline([('imputer', ...), ('encoder', ...)])
-    raise NotImplementedError("Implement `build_categorical_pipeline` following the hints.")
     if encoder_type == "onehot":
-        cat_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("encoder", OneHotEncoder())])
+        encoder = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
     elif encoder_type == "minmax":
-        cat_proc = Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)),("encoder", MinMaxScaler())])
-    return cat_proc
+        encoder = MinMaxScaler()
+    else:
+        raise ValueError(f"Unsupported encoder_type: {encoder_type}")
+    return Pipeline([("imputer", SimpleImputer(strategy=impute_strategy)), ("encoder", encoder)])
 
 
 def build_preprocessor(
@@ -119,11 +120,6 @@ def build_preprocessor(
                ('cat', cat_pipe, categorical_cols)
            ], verbose_feature_names_out=False).set_output(transform='pandas')`
     """
-    # TODO [USER IMPLEMENTATION]:
-    # 1. Instantiate numeric and categorical sub-pipelines
-    # 2. Bundle them in ColumnTransformer
-    # 3. Configure `.set_output(transform='pandas')` so transforms return DataFrames
-    raise NotImplementedError("Implement `build_preprocessor` following the hints.")
     num_pipe = build_numeric_pipeline(scaler_type=num_scaler)
     cat_pipe = build_categorical_pipeline(encoder_type=cat_encoder)
     return ColumnTransformer(transformers=[("num",num_pipe, numeric_cols),("cat",cat_pipe,categorical_cols)],verbose_feature_names_out=False).set_output(transform="pandas")
