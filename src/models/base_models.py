@@ -30,7 +30,7 @@ MATHEMATICAL FOUNDATIONS:
 """
 
 from collections import Counter
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans
@@ -132,6 +132,7 @@ class DecisionTreeModel:
         """Fit Decision Tree model."""
         if max_depth is not None:
             self.max_depth = max_depth
+        self.feature_names_ = list(X_train.columns) if hasattr(X_train, "columns") else None
         self.model = DecisionTreeClassifier(max_depth=self.max_depth, random_state=self.random_state)
         self.model.fit(X_train, y_train)
         return self
@@ -142,8 +143,9 @@ class DecisionTreeModel:
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict_proba(X)
 
-    def get_feature_importances(self, feature_names: List[str]) -> pd.Series:
+    def get_feature_importances(self, feature_names: Optional[Sequence[str]] = None) -> pd.Series:
         """Return sorted Series of Gini feature importances."""
+        feature_names = self.feature_names_
         importances = pd.Series(self.model.feature_importances_, index=feature_names)
         importances = importances.sort_values(ascending=False)
         return importances
