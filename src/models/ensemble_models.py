@@ -101,18 +101,22 @@ class RandomForestModel:
             3. Find best n = list(n_range)[np.argmax(scores_list)]
             4. Return (best_n, scores_list)
         """
-        # TODO [USER IMPLEMENTATION]:
-        raise NotImplementedError("Implement `find_optimal_n_estimators` for RandomForestModel.")
+        cv = StratifiedKFold(n_splits=cv_splits, shuffle=True, random_state=random_state)
+        scores_list = []
+        for n in n_range:
+            rf = RandomForestClassifier(n_estimators=n, max_depth=max_depth, random_state=random_state, n_jobs=-1)
+            scores = cross_val_score(rf, X_train, y_train, cv=cv, scoring='accuracy', n_jobs=-1)
+            scores_list.append(scores.mean())
+        best_n = list(n_range)[np.argmax(scores_list)]
+        return (best_n, scores_list)
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series, n_estimators: Optional[int] = None):
         """Fit Random Forest model."""
         if n_estimators is not None:
             self.n_estimators = n_estimators
             self.model.set_params(n_estimators=self.n_estimators)
-        # TODO [USER IMPLEMENTATION]:
-        # Fit self.model and return self
-        raise NotImplementedError("Implement `fit` for RandomForestModel.")
-
+        self.model.fit(X_train, y_train)
+        return self
     def predict(self, X: pd.DataFrame) -> np.ndarray:
         return self.model.predict(X)
 
@@ -161,8 +165,6 @@ class AdaBoostModel:
             2. For each n in n_range, evaluate AdaBoostClassifier(n_estimators=n, learning_rate=learning_rate)
             3. Return (best_n, scores_list)
         """
-        # TODO [USER IMPLEMENTATION]:
-        raise NotImplementedError("Implement `find_optimal_n_estimators` for AdaBoostModel.")
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series, n_estimators: Optional[int] = None):
         """Fit AdaBoost model."""
@@ -286,8 +288,8 @@ class XGBoostModel:
                scores = cross_val_score(xgb, X_train, y_train, cv=cv, scoring='accuracy')
             3. Return (best_n, scores_list)
         """
-        # TODO [USER IMPLEMENTATION]:
-        raise NotImplementedError("Implement `find_optimal_n_estimators` for XGBoostModel.")
+        pass
+        tree
 
     def fit(self, X_train: pd.DataFrame, y_train: pd.Series, n_estimators: Optional[int] = None):
         """Fit XGBoost model."""
